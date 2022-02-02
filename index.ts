@@ -82,66 +82,82 @@ export function FrameworkArg<T = any>(token: T) {
 }
 
 export function FrameworkMethod(metadataValue: string): MethodDecorator {
-    return (
-      target: object,
-      key: string | symbol,
-      descriptor: TypedPropertyDescriptor<any>,
-    ) => {
-      Reflect.defineMetadata('frameworkMethodKey', metadataValue, descriptor.value);
-      return descriptor;
-    };
+  return (
+    target: object,
+    key: string | symbol,
+    descriptor: TypedPropertyDescriptor<any>,
+  ) => {
+    Reflect.defineMetadata('frameworkMethodKey', { someFunkyFrameworkedValue: metadataValue }, descriptor.value);
+    return descriptor;
+  };
 }
 
 @Business('classKey', 'classValue')
 @Business('anotherClassKey', 'anotherClassValue')
 class Something {
+  private someClassProperty;
+
   constructor(
     @BusinessArg('argKey', 'argValue')
-    arg: string,
+    someConstructorArgument: string,
   ) { }
 
   @Business('methodKey', 'methodValue')
-  method() {
+  someMethod() {
     return '';
   }
+}
+
+function getClassMetadata(metadataKey: string, target: Type) {
+  return Reflect.getMetadata(metadataKey, target);
+}
+
+function getClassConstructorArgumentsMetadata(metadataKey: string, target: Type) {
+  return Reflect.getMetadata(metadataKey, target.constructor) ?? [];
+}
+
+function getClassPropertiesMetadatas<TMetadata = unknown>(metadataKey: string, target: Type): Array<{ descriptor: PropertyDescriptor, propertyName: string, metadata: TMetadata }> {
+  const propertiesNames = Object.getOwnPropertyNames(target.prototype);
+  return propertiesNames.reduce((arr, propertyName) => {
+    const descriptor = Reflect.getOwnPropertyDescriptor(target.prototype, propertyName);
+    if (descriptor?.value) {
+      const methodMetadata = Reflect.getMetadata(metadataKey, descriptor.value);
+      if (methodMetadata) {
+        arr.push({
+          descriptor,
+          propertyName,
+          metadata: methodMetadata,
+        });
+      };
+    }
+    return arr;
+  }, []);
 }
 
 const clazzes: Type[] = [Something];
 
 clazzes.forEach(clazz => {
-  const clazzMeta = Reflect.getMetadata('classKey', clazz);
+  const clazzMeta = getClassMetadata('classKey', clazz);
   if (clazzMeta) {
     applyDecorators(Framework(clazzMeta))(clazz);
   }
-  const frameworkClazzMeta = Reflect.getMetadata('frameworkKey', clazz);
+  const frameworkClazzMeta = getClassMetadata('frameworkKey', clazz);
 
-  const argsMeta = Reflect.getMetadata('argKey', clazz.constructor) ?? [];
+  const argsMeta = getClassConstructorArgumentsMetadata('argKey', clazz);
   argsMeta.forEach(argMeta => applyDecorators(FrameworkArg(argMeta))(clazz));
-  const frameworkArgMeta = Reflect.getMetadata('frameworkArgKey', clazz.constructor);
+  const frameworkArgMeta = getClassConstructorArgumentsMetadata('frameworkArgKey', clazz);
 
-  const membersNames = Object.getOwnPropertyNames(clazz.prototype);
-  const methodsMeta = membersNames.reduce((arr, name) => {
-    const meta = Reflect.getMetadata('methodKey', clazz.prototype, name);
-    if (meta) {
-      arr.push(meta);
-    }
-    return arr;
-  }, []);
-  membersNames.forEach(memberName => {
-    const descriptor = Reflect.getOwnPropertyDescriptor(clazz.prototype, memberName);
-    const meta = Reflect.getMetadata('methodKey', descriptor.value);
-    if(meta) {
-      applyDecorators(FrameworkMethod(meta))(clazz, memberName, descriptor);
-    }
+  const methodsMetadata = getClassPropertiesMetadatas<string>('methodKey', clazz);
+  const methodsMeta = methodsMetadata
+    .map(({ metadata, propertyName }) => ({ propertyName, metadata }));
+  methodsMetadata.forEach(({ descriptor, metadata, propertyName }) => {
+    applyDecorators(FrameworkMethod(metadata))(clazz, propertyName, descriptor);
   });
-  const frameworkMethodMeta = membersNames.reduce((arr, memberName) => {
-    const descriptor = Reflect.getOwnPropertyDescriptor(clazz.prototype, memberName);
-    const meta = Reflect.getMetadata('methodKey', descriptor.value);
-    if (meta) {
-      arr.push(meta);
-    }
-    return arr;
-  }, []);
+  const frameworkMethodMeta = getClassPropertiesMetadatas('frameworkMethodKey', clazz)
+    .reduce((arr, { descriptor, metadata, propertyName }) => {
+      arr.push({ propertyName, metadata });
+      return arr;
+    }, []);
 
   console.log('# Business');
   console.log(`${clazz.name}: ${JSON.stringify(clazzMeta)}`);
