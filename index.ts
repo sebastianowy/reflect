@@ -61,6 +61,25 @@ export const BusinessArg = <K = string, V = any>(
   }
 };
 
+export function BusinessParam<K=string, V=unknown>(
+  metadataKey: K,
+  metadataValue: V,
+): ParameterDecorator {
+  return (target, key, index) => {
+    const args =
+      Reflect.getMetadata(metadataKey, target.constructor, key) ?? [];
+
+    args.push({metadataKey, metadataValue});
+
+    Reflect.defineMetadata(
+      'frameworkParamKey',
+      args,
+      target.constructor,
+      key,
+    );
+  };
+}
+
 export function Framework(value?: string) {
   return (target: object) => {
     Reflect.defineMetadata('frameworkKey', value, target);
@@ -77,6 +96,25 @@ export function FrameworkArg<T = any>(token: T) {
       'frameworkArgKey',
       properties,
       target.constructor,
+    );
+  };
+}
+
+export function FrameworkParam(
+  param,
+  transform: Function,
+): ParameterDecorator {
+  return (target, key, index) => {
+    const args =
+      Reflect.getMetadata('frameworkParamKey', target.constructor, key) ?? [];
+
+    args.push({param, transform});
+
+    Reflect.defineMetadata(
+      'frameworkParamKey',
+      args,
+      target.constructor,
+      key,
     );
   };
 }
@@ -103,7 +141,10 @@ class Something {
   ) { }
 
   @Business('methodKey', 'methodValue')
-  someMethod() {
+  someMethod(
+    @BusinessArg('methodArgKey', {param: 'methodArgValue', transform: (value) => `${value}-transformed`})
+    someMethodArgument: string,
+  ) {
     return '';
   }
 }
