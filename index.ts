@@ -128,14 +128,15 @@ clazzes.forEach(clazz => {
     return arr;
   }, []);
   membersNames.forEach(memberName => {
-    const methodMeta = Reflect.getMetadata('methodKey', clazz, memberName);
-    if(methodMeta) {
-      const descriptor = Reflect.getOwnPropertyDescriptor(clazz, memberName);
-      applyDecorators(FrameworkMethod(methodMeta))(clazz, undefined, descriptor);
+    const descriptor = Reflect.getOwnPropertyDescriptor(clazz.prototype, memberName);
+    const meta = Reflect.getMetadata('methodKey', descriptor.value);
+    if(meta) {
+      applyDecorators(FrameworkMethod(meta))(clazz, memberName, descriptor);
     }
   });
-  const frameworkMethodMeta = membersNames.reduce((arr, name) => {
-    const meta = Reflect.getMetadata('frameworkMethodKey', clazz.prototype, name);
+  const frameworkMethodMeta = membersNames.reduce((arr, memberName) => {
+    const descriptor = Reflect.getOwnPropertyDescriptor(clazz.prototype, memberName);
+    const meta = Reflect.getMetadata('methodKey', descriptor.value);
     if (meta) {
       arr.push(meta);
     }
