@@ -1,5 +1,5 @@
 
-export function BusinessArg<K = string, V = any>(metadataKey: K,
+export function BusinessConstructorArg<K = string, V = any>(metadataKey: K,
   metadataValue: V): ParameterDecorator {
   return (target: object, key: string | symbol, index?: number) => {
     let properties = Reflect.getMetadata(metadataKey, target.constructor) || [];

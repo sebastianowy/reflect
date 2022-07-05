@@ -1,5 +1,5 @@
 
-export function FrameworkArg<T = any>(token: T): ParameterDecorator {
+export function FrameworkConstructorArg<T = any>(token: T): ParameterDecorator {
   return (target: object, key: string | symbol) => {
     let properties = Reflect.getMetadata('frameworkArgKey', target.constructor) || [];
 

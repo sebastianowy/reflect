@@ -6,10 +6,10 @@ export function BusinessParam<K = string, V = unknown>(
   return (target, key, index) => {
     const args = Reflect.getMetadata(metadataKey, target.constructor, key) ?? [];
 
-    args.push({ metadataKey, metadataValue });
+    args.push({ index, metadataValue });
 
     Reflect.defineMetadata(
-      'frameworkParamKey',
+      metadataKey,
       args,
       target.constructor,
       key

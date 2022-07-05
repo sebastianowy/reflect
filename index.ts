@@ -1,68 +1,71 @@
 import 'reflect-metadata';
 import { applyDecorators } from './common/applyDecorators';
-import { Business } from './business/Business';
-import { BusinessArg } from './business/BusinessArg';
 import { Framework } from './framework/Framework';
-import { FrameworkArg } from './framework/FrameworkArg';
+import { FrameworkConstructorArg } from './framework/FrameworkConstructorArg';
 import { FrameworkMethod } from './framework/FrameworkMethod';
 import { getClassConstructorArgumentsMetadata } from './common/getClassConstructorArgumentsMetadata';
 import { getClassMetadata } from './common/getClassMetadata';
 import { getClassPropertiesMetadatas } from './common/getClassPropertiesMetadatas';
 import { Type } from './common/Type';
-import { BusinessMethod } from './business/BusinessMethod';
-import { BusinessParam } from './business/BusinessParam';
+import { Something } from './app/Something';
+import { getClassMethodArgumentsMetadata } from './common/getClassMethodArgumentsMetadata';
+import { FrameworkParam } from './framework/FrameworkParam';
+import { inspect } from 'node:util'
 
-@Business('classKey', 'classValue')
-@Business('anotherClassKey', 'anotherClassValue')
-class Something {
-  private someClassProperty;
+const appClazzes: Type[] = [Something];
 
-  constructor(
-    @BusinessArg('argKey', 'argValue')
-    someConstructorArgument: string,
-  ) { }
-
-  @BusinessMethod('methodKey', 'methodValue')
-  someMethod(
-    @BusinessParam('methodArgKey', { param: 'methodArgValue', transform: (value) => `${value}-transformed` })
-    someMethodArgument: string,
-  ) {
-    return '';
-  }
-}
-
-const clazzes: Type[] = [Something];
-
-clazzes.forEach(clazz => {
+appClazzes.forEach(clazz => {
+  // Class decorating
   const clazzMeta = getClassMetadata('classKey', clazz);
   if (clazzMeta) {
     applyDecorators(Framework(clazzMeta))(clazz);
   }
   const frameworkClazzMeta = getClassMetadata('frameworkKey', clazz);
 
-  const argsMeta = getClassConstructorArgumentsMetadata('argKey', clazz);
-  argsMeta.forEach(argMeta => applyDecorators(FrameworkArg(argMeta))(clazz));
-  const frameworkArgMeta = getClassConstructorArgumentsMetadata('frameworkArgKey', clazz);
+  // Constructor args decorating
+  const constructorArgsMeta = getClassConstructorArgumentsMetadata('argKey', clazz);
+  constructorArgsMeta.forEach(argMeta => applyDecorators(FrameworkConstructorArg(argMeta))(clazz));
+  const frameworkConstructorArgMeta = getClassConstructorArgumentsMetadata('frameworkArgKey', clazz);
 
-  const methodsMetadata = getClassPropertiesMetadatas<string>('methodKey', clazz);
-  const methodsMeta = methodsMetadata
+  // Class properties decorating
+  const propertiesMeta = getClassPropertiesMetadatas<string>('methodKey', clazz);
+  const propertiesMetaToLog = propertiesMeta
     .map(({ metadata, propertyName }) => ({ propertyName, metadata }));
-  methodsMetadata.forEach(({ descriptor, metadata, propertyName }) => {
+  propertiesMeta.forEach(({ descriptor, metadata, propertyName }) => {
     applyDecorators(FrameworkMethod(metadata))(clazz, propertyName, descriptor);
   });
-  const frameworkMethodMeta = getClassPropertiesMetadatas('frameworkMethodKey', clazz)
+  const frameworkPropertiesMeta = getClassPropertiesMetadatas('frameworkMethodKey', clazz)
     .reduce((arr, { descriptor, metadata, propertyName }) => {
       arr.push({ propertyName, metadata });
       return arr;
     }, []);
 
+  // Class methods' arguments decorating
+  const methodsArgumentsMeta = Object.getOwnPropertyNames(clazz.prototype).map((methodName) => {
+    const methodArgumentsMetadata = getClassMethodArgumentsMetadata('methodArgKey', clazz, methodName);
+    return { methodName, methodArgumentsMetadata };
+  }).filter(({ methodArgumentsMetadata }) => methodArgumentsMetadata.length);
+  methodsArgumentsMeta.forEach(({ methodName, methodArgumentsMetadata }) => {
+    methodArgumentsMetadata.forEach(methodArgumentMetadata => {
+      console.log(methodName, methodArgumentMetadata)
+      applyDecorators(FrameworkParam(methodArgumentMetadata.metadataValue.param, methodArgumentMetadata.metadataValue.transform))(clazz, methodName, methodArgumentMetadata.index);
+    });
+  });
+  const frameworkMethodsArgumentsMeta = Object.getOwnPropertyNames(clazz.prototype).map((methodName) => {
+    const methodArgumentsMetadata = getClassMethodArgumentsMetadata('frameworkParamKey', clazz, methodName);
+    return { methodName, methodArgumentsMetadata };
+  }).filter(({ methodArgumentsMetadata }) => methodArgumentsMetadata.length);
+
   console.log('# Business');
   console.log(`${clazz.name}: ${JSON.stringify(clazzMeta)}`);
-  console.log(`${clazz.name} args: ${JSON.stringify(argsMeta)}`);
-  console.log(`${clazz.name} methods: ${JSON.stringify(methodsMeta)}`);
+  console.log(`${clazz.name} constructor args: ${JSON.stringify(constructorArgsMeta)}`);
+  console.log(`${clazz.name} properties: ${JSON.stringify(propertiesMetaToLog)}`);
+  console.log(`${clazz.name} methods args: ${inspect(methodsArgumentsMeta, { depth: 10 })}`);
+
 
   console.log('# Frameworked');
   console.log(`${clazz.name}: ${JSON.stringify(frameworkClazzMeta)}`);
-  console.log(`${clazz.name} args: ${JSON.stringify(frameworkArgMeta)}`);
-  console.log(`${clazz.name} methods: ${JSON.stringify(frameworkMethodMeta)}`);
+  console.log(`${clazz.name} constructor args: ${JSON.stringify(frameworkConstructorArgMeta)}`);
+  console.log(`${clazz.name} properties: ${JSON.stringify(frameworkPropertiesMeta)}`);
+  console.log(`${clazz.name} methods args: ${inspect(frameworkMethodsArgumentsMeta, { depth: 10 })}`);
 });
