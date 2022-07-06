@@ -23,9 +23,9 @@ appClazzes.forEach(clazz => {
   const frameworkClazzMeta = getClassMetadata('frameworkKey', clazz);
 
   // Constructor args decorating
-  const constructorArgsMeta = getClassConstructorArgumentsMetadata('argKey', clazz);
-  constructorArgsMeta.forEach(argMeta => applyDecorators(FrameworkConstructorArg(argMeta))(clazz));
-  const frameworkConstructorArgMeta = getClassConstructorArgumentsMetadata('frameworkArgKey', clazz);
+  const constructorArgsMeta = Object.values<any>(getClassConstructorArgumentsMetadata('argKey', clazz));
+  constructorArgsMeta.forEach(argMeta => applyDecorators(FrameworkConstructorArg(argMeta.metadataValue))(clazz, undefined, argMeta.index));
+  const frameworkConstructorArgMeta = Object.values(getClassConstructorArgumentsMetadata('frameworkArgKey', clazz));
 
   // Class properties decorating
   const propertiesMeta = getClassPropertiesMetadatas<string>('methodKey', clazz);
@@ -42,17 +42,18 @@ appClazzes.forEach(clazz => {
 
   // Class methods' arguments decorating
   const methodsArgumentsMeta = Object.getOwnPropertyNames(clazz.prototype).map((methodName) => {
-    const methodArgumentsMetadata = getClassMethodArgumentsMetadata('methodArgKey', clazz, methodName);
+    const methodArgumentsMetadata = Object.values<any>(getClassMethodArgumentsMetadata('methodArgKey', clazz, methodName));
     return { methodName, methodArgumentsMetadata };
   }).filter(({ methodArgumentsMetadata }) => methodArgumentsMetadata.length);
+
   methodsArgumentsMeta.forEach(({ methodName, methodArgumentsMetadata }) => {
     methodArgumentsMetadata.forEach(methodArgumentMetadata => {
-      console.log(methodName, methodArgumentMetadata)
-      applyDecorators(FrameworkParam(methodArgumentMetadata.metadataValue.param, methodArgumentMetadata.metadataValue.transform))(clazz, methodName, methodArgumentMetadata.index);
+      applyDecorators(FrameworkParam(methodArgumentMetadata.metadataValue.param, methodArgumentMetadata.metadataValue.transform))(clazz.prototype, methodName, methodArgumentMetadata.index);
     });
   });
+
   const frameworkMethodsArgumentsMeta = Object.getOwnPropertyNames(clazz.prototype).map((methodName) => {
-    const methodArgumentsMetadata = getClassMethodArgumentsMetadata('frameworkParamKey', clazz, methodName);
+    const methodArgumentsMetadata = Object.values(getClassMethodArgumentsMetadata('frameworkParamKey', clazz, methodName));
     return { methodName, methodArgumentsMetadata };
   }).filter(({ methodArgumentsMetadata }) => methodArgumentsMetadata.length);
 
@@ -61,7 +62,6 @@ appClazzes.forEach(clazz => {
   console.log(`${clazz.name} constructor args: ${JSON.stringify(constructorArgsMeta)}`);
   console.log(`${clazz.name} properties: ${JSON.stringify(propertiesMetaToLog)}`);
   console.log(`${clazz.name} methods args: ${inspect(methodsArgumentsMeta, { depth: 10 })}`);
-
 
   console.log('# Frameworked');
   console.log(`${clazz.name}: ${JSON.stringify(frameworkClazzMeta)}`);

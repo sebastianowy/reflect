@@ -1,9 +1,8 @@
-
 export function FrameworkConstructorArg<T = any>(token: T): ParameterDecorator {
-  return (target: object, key: string | symbol) => {
-    let properties = Reflect.getMetadata('frameworkArgKey', target.constructor) || [];
+  return (target: object, key: string | symbol, index) => {
+    const properties = Reflect.getMetadata('frameworkArgKey', target.constructor) ?? {};
 
-    properties = [...properties, { key, token }];
+    properties[index] = { token, index };
     Reflect.defineMetadata(
       'frameworkArgKey',
       properties,

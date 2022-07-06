@@ -4,9 +4,9 @@ export function BusinessParam<K = string, V = unknown>(
   metadataValue: V
 ): ParameterDecorator {
   return (target, key, index) => {
-    const args = Reflect.getMetadata(metadataKey, target.constructor, key) ?? [];
+    const args = Reflect.getMetadata(metadataKey, target.constructor, key) ?? {};
 
-    args.push({ index, metadataValue });
+    args[index] = { index, metadataValue };
 
     Reflect.defineMetadata(
       metadataKey,

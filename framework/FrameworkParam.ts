@@ -4,9 +4,9 @@ export function FrameworkParam(
   transform: Function
 ): ParameterDecorator {
   return (target, key, index) => {
-    const args = Reflect.getMetadata('frameworkParamKey', target.constructor, key) ?? [];
+    const args = Reflect.getMetadata('frameworkParamKey', target.constructor, key) ?? {};
 
-    args.push({ param, transform });
+    args[index] = { index, param, transform };
 
     Reflect.defineMetadata(
       'frameworkParamKey',

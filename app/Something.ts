@@ -11,13 +11,29 @@ export class Something {
 
   constructor(
     @BusinessConstructorArg('argKey', 'argValue')
-    someConstructorArgument: string
+    someConstructorArgument: string,
+    @BusinessConstructorArg('argKey', 'argValueForSecondParameter')
+    someConstructorSecondArgument: number,
+    @BusinessConstructorArg('argKey', 'argValueForThirdParameter')
+    someConstructorThridArgument: number,
   ) { }
 
   @BusinessMethod('methodKey', 'methodValue')
   someMethod(
     @BusinessParam('methodArgKey', { param: 'methodArgValue', transform: (value) => `${value}-transformed` })
-    someMethodArgument: string
+    someMethodArgument: string,
+    @BusinessParam('methodArgKey', { param: 'methodSecondArgValue', transform: (value) => `${value}-second-transformed` })
+    someMethodSecondArgument: string,
+  ) {
+    return '';
+  }
+
+  @BusinessMethod('methodKey', 'methodValue')
+  someSecondMethod(
+    @BusinessParam('methodArgKey', { param: 'methodArgValue', transform: (value) => `${value}-transformed` })
+    someSecondMethodArgument: string,
+    @BusinessParam('methodArgKey', { param: 'methodSecondArgValue', transform: (value) => `${value}-second-transformed` })
+    someSecondMethodSecondArgument: string,
   ) {
     return '';
   }
