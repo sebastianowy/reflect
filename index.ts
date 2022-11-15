@@ -7,12 +7,13 @@ import { getClassConstructorArgumentsMetadata } from './common/getClassConstruct
 import { getClassMetadata } from './common/getClassMetadata';
 import { getClassPropertiesMetadatas } from './common/getClassPropertiesMetadatas';
 import { Type } from './common/Type';
-import { Something } from './app/Something';
 import { getClassMethodArgumentsMetadata } from './common/getClassMethodArgumentsMetadata';
 import { FrameworkParam } from './framework/FrameworkParam';
-import { inspect } from 'node:util'
+import { inspect } from 'util';
+import { clazzes } from './business/Business';
+import { Something } from './app/Something';
 
-const appClazzes: Type[] = [Something];
+const appClazzes: Type[] = clazzes;
 
 appClazzes.forEach(clazz => {
   // Class decorating
@@ -69,3 +70,5 @@ appClazzes.forEach(clazz => {
   console.log(`${clazz.name} properties: ${JSON.stringify(frameworkPropertiesMeta)}`);
   console.log(`${clazz.name} methods args: ${inspect(frameworkMethodsArgumentsMeta, { depth: 10 })}`);
 });
+
+Something.name;
