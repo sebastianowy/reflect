@@ -1,5 +1,5 @@
 
-export function FrameworkParam(
+export function FrameworkMethodParam(
   param,
   transform: Function
 ): ParameterDecorator {

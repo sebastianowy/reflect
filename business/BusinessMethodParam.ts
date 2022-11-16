@@ -1,5 +1,5 @@
 
-export function BusinessParam<K = string, V = unknown>(
+export function BusinessMethodParam<K = string, V = unknown>(
   metadataKey: K,
   metadataValue: V
 ): ParameterDecorator {
