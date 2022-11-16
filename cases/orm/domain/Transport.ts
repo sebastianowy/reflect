@@ -4,8 +4,11 @@ import { DomainColumn } from "./decorators/DomainColumn";
 
 @DomainEntity(new Date())
 export class Transport {
-    @DomainColumn()
-    private readonly id: string;
+  constructor(justSomeField: string) {
+    console.log("# constructor", justSomeField);
+  }
+  @DomainColumn('yo')
+  private readonly id: string;
 
-    private readonly bookings: Booking[];
+  private readonly bookings: Booking[];
 }

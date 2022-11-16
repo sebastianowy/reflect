@@ -9,17 +9,17 @@ export function getClassPropertiesMetadatas<TMetadata = unknown>(
 }> {
   const propertiesNames = Object.getOwnPropertyNames(target.prototype);
   return propertiesNames.reduce((arr, propertyName) => {
-    const methodMetadata = Reflect.getMetadata(
+    const propertyMetadata = Reflect.getMetadata(
       metadataKey,
       target.prototype,
       propertyName
     );
-    if (methodMetadata === undefined) {
+    if (propertyMetadata === undefined) {
       return arr;
     }
     arr.push({
       propertyName,
-      metadata: methodMetadata,
+      metadata: propertyMetadata,
     });
     return arr;
   }, []);
