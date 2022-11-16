@@ -1,7 +1,7 @@
 import { Type } from "./Type";
 
 export function getClassPropertiesMetadatas<TMetadata = unknown>(
-  metadataKey: string,
+  metadataKey: string | symbol,
   target: Type
 ): Array<{
   propertyName: string;
