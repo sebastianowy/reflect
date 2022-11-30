@@ -1,6 +1,6 @@
 import { inspect } from "util";
-import { getClassMetadata } from "../../common/getClassMetadata";
-import { getClassPropertiesMetadatas } from "../../common/getClassPropertiesMetadatas";
+import { getClassMetadata } from "../../core/getClassMetadata";
+import { getClassPropertiesMetadatas } from "../../core/getClassPropertiesMetadatas";
 import { entitiesClasses } from "./domain/decorators/DomainEntity";
 import { Transport } from "./domain/Transport";
 import { ormColumnMetadataIdentifier } from "./infra/OrmColumn";

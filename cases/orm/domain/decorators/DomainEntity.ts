@@ -1,4 +1,4 @@
-import { Type } from "../../../../common/Type";
+import { Type } from "../../../../core/Type";
 
 export function DomainEntity(value?: unknown): ClassDecorator {
   return (target: object) => {

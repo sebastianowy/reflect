@@ -1,4 +1,4 @@
-import { Type } from "../common/Type";
+import { Type } from "../../../core/Type";
 
 export const clazzes: Type[] = [];
 export function Business<K = string, V = any>(metadataKey: K,

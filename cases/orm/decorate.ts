@@ -1,8 +1,8 @@
-import { applyClassDecorator } from "../../common/applyClassDecorator";
-import { applyDecorators } from "../../common/applyDecorators";
-import { applyPropertyDecorator } from "../../common/applyPropertyDecorator";
-import { getClassMetadata } from "../../common/getClassMetadata";
-import { getClassPropertiesMetadatas } from "../../common/getClassPropertiesMetadatas";
+import { applyClassDecorator } from "../../core/applyClassDecorator";
+import { applyDecorators } from "../../core/applyDecorators";
+import { applyPropertyDecorator } from "../../core/applyPropertyDecorator";
+import { getClassMetadata } from "../../core/getClassMetadata";
+import { getClassPropertiesMetadatas } from "../../core/getClassPropertiesMetadatas";
 import { domainColumnMetadataIdentifier } from "./domain/decorators/DomainColumn";
 import {
   domainEntityMetadataIdentifier,
