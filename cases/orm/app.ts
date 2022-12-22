@@ -11,13 +11,13 @@ export function runApp(): void {
   console.log(
     inspect(getClassMetadata(ormEntityMetadataIdentifier, Transport))
   );
-  const transports = getTransports();
+  const transports = getTransportsWithPropertiesValuesContainingTheirMetadata();
   console.log(inspect(transports));
 }
 
-function getTransports(): Transport[] {
+function getTransportsWithPropertiesValuesContainingTheirMetadata(): Transport[] {
   const entities = entitiesClasses.map((entityClass) => {
-    const entity = Object.create(entityClass.prototype);
+    const entity = Object.create(entityClass.prototype); // could be used with `new`, but this way you avoid constructor
     const props = getClassPropertiesMetadatas(
       ormColumnMetadataIdentifier,
       entityClass
